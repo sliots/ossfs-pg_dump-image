@@ -1,7 +1,7 @@
 FROM alpine:latest AS builder
 ENV OSSFS_VERSION v1.80.7
 RUN sed -i 's/dl-cdn.alpinelinux.org/mirrors.aliyun.com/' /etc/apk/repositories
-RUN apk --update add fuse alpine-sdk automake autoconf libxml2-dev fuse-dev curl-dev build-base make libcurl openssl libstdc++ libgcc pkgconfig
+RUN apk --update add fuse alpine-sdk automake autoconf libxml2-dev fuse-dev curl-dev
 RUN wget -qO- https://github.com/aliyun/ossfs/archive/$OSSFS_VERSION.tar.gz |tar xz
 RUN cd ossfs-1.80.7 \
   && ./autogen.sh \
@@ -9,9 +9,9 @@ RUN cd ossfs-1.80.7 \
   && make \
   && make install
 
-FROM postgres:15-alpine
+FROM alpine:latest
 RUN sed -i 's/dl-cdn.alpinelinux.org/mirrors.aliyun.com/' /etc/apk/repositories
-RUN apk --update add fuse curl libxml2 openssl libstdc++ libgcc mysql-client tzdata && rm -rf /var/cache/apk/* 
+RUN apk --update add fuse curl libxml2 openssl libstdc++ libgcc postgresql-client && rm -rf /var/cache/apk/* 
 ENV OSSFS_VERSION v1.80.7
 COPY --from=builder /usr/bin/ossfs /usr/bin/ossfs
 COPY mount.sh .
